@@ -8,14 +8,11 @@ import {Table,
         TableCell,
         Card,
         Button,
-        TextField,
-        NativeSelect,
-        FormControl,
-        InputLabel
         } from '@material-ui/core';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';  
+ 
 import { withStyles } from '@material-ui/core/styles';
-import classes from '*.module.css';
+
+import SimpleDialog from '../../../public/components/dialog'
 
 interface Props {}
 interface State {}
@@ -23,14 +20,16 @@ interface State {}
 const styles = theme => ({
 root: {
     height: '100vh',
-    width: '100vw'
+    width: '100vw',
+   
 },
 centerContainer: {
     minWidth: 275,
     maxWidth: 500,
     margin: '0 auto',
-    height: '100%'
-    
+    height: '100%',
+    overflow: 'scroll', 
+    textAlign: 'center'
 }, 
 inputContainer: {
     display: 'flex',
@@ -62,7 +61,8 @@ class gameRoom extends Component<Props, State> {
             myName: '', 
             timer: 8, 
             locations: [],
-            gameState: 'PREGAME'
+            gameState: 'GAME',
+            dialogOpen: false
         }
     }
 
@@ -122,6 +122,18 @@ class gameRoom extends Component<Props, State> {
         state.disableStart = false
         this.setState(state);
     }
+
+    handleClose = () => {
+        let state = {}
+        state.dialogOpen = false
+        this.setState(state);
+      };
+
+    handleClickOpen = () => {
+        let state = {}
+        state.dialogOpen = true
+        this.setState(state);
+    };
 
     render(): ReactNode {
         const { classes } = this.props;
@@ -184,34 +196,30 @@ class gameRoom extends Component<Props, State> {
         } else { // game time
             return (
                 <div className={classes.root}>
+                    {console.log(this.state.locations)}
                 <Card className={classes.centerContainer}>
                     <div className={classes.title}>
-                            Spyfall
-                            <h1>{this.state.gameCode}</h1>
+                            Spyfall: <span>{this.state.gameCode}</span>
                     </div>
                 
+                <Button color='secondary' onClick={this.handleClickOpen} style={{background: 'white', marginBottom: '20px'}}>
+                    Show Role
+                </Button>
+
+                <SimpleDialog open={this.state.dialogOpen} onClose={this.handleClose} ></SimpleDialog>
 
                     <div className={classes.inputContainer}>
                         {/* <TextField id="gameCode" label="Game Code" autoCorrect='off' spellCheck="false" onChange={this.handleChange} style={{width: '200px', margin: '0 auto', marginBottom: '20px'}}></TextField>
                         <TextField id="name" label="Name" autoCorrect='off' spellCheck="false" onChange={this.handleChange}  style={{width: '200px', margin: '0 auto', marginBottom: '20px'}}></TextField> */}
 
                         {/* Players table that will be updated with socket.io */}
-                        <Table>
-                            <TableHead>
-                                <TableRow>
-                                    <TableCell>Players</TableCell>
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {
-                                this.state.locations.map(element => <TableRow key={element.location}>
-                                                        <TableCell align="center" >{element.location}</TableCell>
-                                                    </TableRow>)
+                        <div style={{display:'flex', flexWrap:'wrap', textAlign: 'left'}}>
+                            {
+                                this.state.locations.map(element => <div style={{width:'50%', paddingLeft: '20px'}} key={element.location}>
+                                                       {element.location}
+                                                    </div>)
                                 }
-                            </TableBody>
-                        </Table>
-
-                     
+                        </div>
                     </div>
                         
                 </Card> 
