@@ -6,7 +6,7 @@ import Dialog from '@material-ui/core/Dialog';
 
 const useStyles = makeStyles({
    test: {
-       background: 'white'
+       background: 'transparent', 
    }
   });
 

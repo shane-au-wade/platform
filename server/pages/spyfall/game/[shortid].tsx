@@ -62,7 +62,8 @@ class gameRoom extends Component<Props, State> {
             timer: 8, 
             locations: [],
             gameState: 'GAME',
-            dialogOpen: false
+            dialogOpen: false,
+            blurOnDialogToggle: {}
         }
     }
 
@@ -126,6 +127,7 @@ class gameRoom extends Component<Props, State> {
     handleClose = () => {
         let state = {}
         state.dialogOpen = false
+        state.blurOnDialogToggle = {back}
         this.setState(state);
       };
 
@@ -195,7 +197,7 @@ class gameRoom extends Component<Props, State> {
             )
         } else { // game time
             return (
-                <div className={classes.root}>
+                <div className={classes.root}  style={this.state.blurOnDialogToggle}>
                     {console.log(this.state.locations)}
                 <Card className={classes.centerContainer}>
                     <div className={classes.title}>
@@ -206,7 +208,7 @@ class gameRoom extends Component<Props, State> {
                     Show Role
                 </Button>
 
-                <SimpleDialog open={this.state.dialogOpen} onClose={this.handleClose} ></SimpleDialog>
+                
 
                     <div className={classes.inputContainer}>
                         {/* <TextField id="gameCode" label="Game Code" autoCorrect='off' spellCheck="false" onChange={this.handleChange} style={{width: '200px', margin: '0 auto', marginBottom: '20px'}}></TextField>
@@ -221,6 +223,8 @@ class gameRoom extends Component<Props, State> {
                                 }
                         </div>
                     </div>
+
+                    <SimpleDialog open={this.state.dialogOpen} onClose={this.handleClose} ></SimpleDialog>
                         
                 </Card> 
             </div>
