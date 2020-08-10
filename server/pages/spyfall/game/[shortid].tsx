@@ -14,8 +14,29 @@ import { withStyles } from '@material-ui/core/styles';
 
 import SimpleDialog from '../../../public/components/dialog'
 
-interface Props {}
-interface State {}
+type GameState = "PREGAME" | "INGAME"
+
+interface Props {
+    id: string,
+    classes: {
+        root: string,
+        centerContainer: string,
+        inputContainer: string,
+        title: string,
+        spacer: string
+    }
+}
+
+interface State {   
+    gameCode: string, 
+    players: Array<{name: string}>,
+    myName: String, 
+    timer: number, 
+    locations: Array<{location: string}>,
+    gameState: GameState, 
+    dialogOpen: boolean,
+    blurOnDialogToggle: {filter: string} | {}
+}
 
 const styles = theme => ({
 root: {
@@ -43,11 +64,6 @@ title: {
 spacer: {
     height: '30%'
 },
-startButton: {
-    width: '200px',
-    margin: '0 auto',
-    marginBottom: '20px'
-}
 });
 
 class gameRoom extends Component<Props, State> {
@@ -61,81 +77,63 @@ class gameRoom extends Component<Props, State> {
             myName: '', 
             timer: 8, 
             locations: [],
-            gameState: 'GAME',
+            gameState: 'INGAME',
             dialogOpen: false,
             blurOnDialogToggle: {}
         }
     }
 
-    componentDidMount = async () => {
-
-        let myName = localStorage.getItem('myName')
-
+    loadSocketIOCode = (myName: string): void => {
         const socket = io.connect('/spyfall/socket');
+
+        socket.emit('join', { gameCode: this.state.gameCode });
+
+        socket.emit('newPlayer', {name: myName, room: this.state.gameCode})
 
         socket.on('news', function (data) {
             console.log(data);
             socket.emit('my other event', { my: 'data' });
           });
 
-        socket.emit('join', { gameCode: this.state.gameCode });
-
-        socket.emit('newPlayer', {name: myName, room: this.state.gameCode})
-
         socket.on('updatePlayers',  (data) => {
             console.log('updating players arr')
-           let state = {}
-           state.players = data.players
-           this.setState(state)
+            let state = {players: data.players}
+            this.setState(state)
         })
-
-           // update game code
-
-           let res = await fetch('http://localhost:4000/api/spyfall/getLocations')
-            let locations = await res.json()
-
-           let state = {}
-           state.myName = myName
-           state.locations = locations
-           this.setState(state);
-           console.log(this.state)
     }
 
-    handleChange = (event) => {
-        //console.log(event.target.id)
-        event.target.value = event.target.value.toUpperCase()
-        let state = {}
-        state[event.target.id] = event.target.value
+    componentDidMount = async () => {
+        let myName = localStorage.getItem('myName')
+        this.loadSocketIOCode(myName)
+
+        // update game code
+        let res = await fetch('http://localhost:4000/api/spyfall/getLocations')
+        let locations = await res.json()
+        let state = {
+            myName: myName,
+            locations: locations
+        }
         this.setState(state);
+        //console.log(this.state)
     }
 
-    handleJoin = () => {
-        console.log(this.state)
-    } 
-
-    handleTimeSelect = (event) => {
-        console.log(event.target.value)
-    }
-
-    enableStart = () => {
-        let state = {}
-        state.startButton = { background: 'rgba(52, 235, 110, 0.9)'}
-        state.disableStart = false
+    handleClickOpen = () => {
+        let state = {
+            dialogOpen: true,
+            blurOnDialogToggle: {filter: 'blur(1px)'}
+        }
         this.setState(state);
-    }
+    };
 
     handleClose = () => {
-        let state = {}
-        state.dialogOpen = false
-        state.blurOnDialogToggle = {back}
+        let state = {
+            dialogOpen: false,
+            blurOnDialogToggle: {}
+        }
         this.setState(state);
       };
 
-    handleClickOpen = () => {
-        let state = {}
-        state.dialogOpen = true
-        this.setState(state);
-    };
+    
 
     render(): ReactNode {
         const { classes } = this.props;
@@ -150,16 +148,10 @@ class gameRoom extends Component<Props, State> {
                 <Card className={classes.centerContainer}>
                     <div className={classes.title}>
                             Spyfall
-
                             <h1>{this.state.gameCode}</h1>
                     </div>
-                
-
+            
                     <div className={classes.inputContainer}>
-                        {/* <TextField id="gameCode" label="Game Code" autoCorrect='off' spellCheck="false" onChange={this.handleChange} style={{width: '200px', margin: '0 auto', marginBottom: '20px'}}></TextField>
-                        <TextField id="name" label="Name" autoCorrect='off' spellCheck="false" onChange={this.handleChange}  style={{width: '200px', margin: '0 auto', marginBottom: '20px'}}></TextField> */}
-
-                        {/* Players table that will be updated with socket.io */}
                         <Table>
                             <TableHead>
                                 <TableRow>
@@ -174,22 +166,6 @@ class gameRoom extends Component<Props, State> {
                                 }
                             </TableBody>
                         </Table>
-
-                        {/* time select options */}
-                        {/* <FormControl style={{width: '100px', margin: '0 auto', marginTop: '20px', marginBottom: '20px'}}>
-                            <InputLabel>Timer</InputLabel>
-                            <NativeSelect
-                            onChange={this.handleTimeSelect}
-                            name='timer'
-                            defaultValue={8}
-                            >
-                                <option value={6}>6:00</option>
-                                <option value={7}>7:00</option>
-                                <option value={8}>8:00</option>
-                                <option value={9}>9:00</option>
-                                <option value={10}>10:00</option>
-                            </NativeSelect>
-                        </FormControl> */}
                     </div>
                         
                 </Card> 
@@ -207,25 +183,18 @@ class gameRoom extends Component<Props, State> {
                 <Button color='secondary' onClick={this.handleClickOpen} style={{background: 'white', marginBottom: '20px'}}>
                     Show Role
                 </Button>
+                <SimpleDialog open={this.state.dialogOpen} onClose={this.handleClose} ></SimpleDialog>
 
-                
-
-                    <div className={classes.inputContainer}>
-                        {/* <TextField id="gameCode" label="Game Code" autoCorrect='off' spellCheck="false" onChange={this.handleChange} style={{width: '200px', margin: '0 auto', marginBottom: '20px'}}></TextField>
-                        <TextField id="name" label="Name" autoCorrect='off' spellCheck="false" onChange={this.handleChange}  style={{width: '200px', margin: '0 auto', marginBottom: '20px'}}></TextField> */}
-
-                        {/* Players table that will be updated with socket.io */}
-                        <div style={{display:'flex', flexWrap:'wrap', textAlign: 'left'}}>
-                            {
-                                this.state.locations.map(element => <div style={{width:'50%', paddingLeft: '20px'}} key={element.location}>
-                                                       {element.location}
-                                                    </div>)
-                                }
-                        </div>
+                <div className={classes.inputContainer}>
+                    <div style={{display:'flex', flexWrap:'wrap', textAlign: 'left'}}>
+                        {
+                            this.state.locations.map(element => <div style={{width:'50%', paddingLeft: '20px'}} key={element.location}>
+                                                    {element.location}
+                                                </div>)
+                            }
                     </div>
+                </div>
 
-                    <SimpleDialog open={this.state.dialogOpen} onClose={this.handleClose} ></SimpleDialog>
-                        
                 </Card> 
             </div>
             )
