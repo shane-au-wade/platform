@@ -118,5 +118,3 @@ function onError(error) {
  // end nextApp.prepare()
 })
 
-module.exports = {PoweredByExpress: true}
-

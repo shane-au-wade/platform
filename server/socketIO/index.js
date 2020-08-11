@@ -1,8 +1,7 @@
 const socket = require('socket.io');
 const io = socket();  
-let users = []
+//let users = []
 let connections = []
-
 
  io
  .of('/spyfall/socket')
