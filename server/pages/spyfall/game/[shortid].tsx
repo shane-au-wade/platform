@@ -22,6 +22,7 @@ interface Props {
         root: string,
         centerContainer: string,
         inputContainer: string,
+        buttonStyle: string,
         title: string,
         spacer: string
     }
@@ -38,7 +39,7 @@ interface State {
     blurOnDialogToggle: {filter: string} | {}
 }
 
-const styles = theme => ({
+const styles = (theme: object): object => ({
 root: {
     height: '100vh',
     width: '100vw',
@@ -56,6 +57,12 @@ inputContainer: {
     display: 'flex',
     flexDirection: 'column'
 }, 
+buttonStyle: {
+    width: '200px', 
+    background: 'white', 
+    margin: '0 auto', 
+    marginBottom: '20px'
+},
 title: {
     width: '100%',
     textAlign: 'center',
@@ -66,7 +73,7 @@ spacer: {
 },
 });
 
-class gameRoom extends Component<Props, State> {
+class ClientGamePage extends Component<Props, State> {
 
     constructor(props: Props) {
         super(props)
@@ -77,7 +84,7 @@ class gameRoom extends Component<Props, State> {
             myName: '', 
             timer: 8, 
             locations: [],
-            gameState: 'INGAME',
+            gameState: 'PREGAME',
             dialogOpen: false,
             blurOnDialogToggle: {}
         }
@@ -133,7 +140,23 @@ class gameRoom extends Component<Props, State> {
         this.setState(state);
       };
 
-    
+    toggleLocationLineThrough = (event): void => {
+        let elem = event.target
+
+        if(elem.style.textDecoration === 'line-through') {
+            elem.style.textDecoration = 'none'
+        } else {
+            elem.style.textDecoration = 'line-through'
+        }
+    }
+
+    toggleGameState = (): void => {
+        if(this.state.gameState === 'PREGAME') {
+            this.setState({gameState: 'INGAME'})
+        } else {
+            this.setState({gameState: 'PREGAME'})
+        }
+    }
 
     render(): ReactNode {
         const { classes } = this.props;
@@ -167,14 +190,21 @@ class gameRoom extends Component<Props, State> {
                             </TableBody>
                         </Table>
                     </div>
-                        
+                    <br/>
+
+                    {/* This toggle button is here for demonstration purposed
+                        The final gamestate toggling would be done through the
+                        startGame function in the game/index.tsx (the HostMenuPage)
+                    */}
+                    <Button onClick={this.toggleGameState} color='primary' className={classes.buttonStyle}>
+                         Toggle GameState   
+                    </Button>    
                 </Card> 
                 </div>
             )
         } else { // game time
             return (
                 <div className={classes.root}  style={this.state.blurOnDialogToggle}>
-                    {console.log(this.state.locations)}
                 <Card className={classes.centerContainer}>
                     <div className={classes.title}>
                             Spyfall: <span>{this.state.gameCode}</span>
@@ -188,12 +218,21 @@ class gameRoom extends Component<Props, State> {
                 <div className={classes.inputContainer}>
                     <div style={{display:'flex', flexWrap:'wrap', textAlign: 'left'}}>
                         {
-                            this.state.locations.map(element => <div style={{width:'50%', paddingLeft: '20px'}} key={element.location}>
+                            this.state.locations.map(element => <div onClick={this.toggleLocationLineThrough} style={{width:'50%', paddingLeft: '20px', paddingTop: '5px'}} key={element.location}>
                                                     {element.location}
                                                 </div>)
                             }
                     </div>
                 </div>
+
+                 {/* This toggle button is here for demonstration purposed
+                        The final gamestate toggling would be done through the
+                    startGame function in the game/index.tsx (the HostMenuPage)
+                */}
+                <br/>
+                <Button onClick={this.toggleGameState} color='primary' className={classes.buttonStyle}>
+                        Toggle GameState   
+                </Button>  
 
                 </Card> 
             </div>
@@ -205,7 +244,7 @@ class gameRoom extends Component<Props, State> {
     }
 }
 
-export default withStyles(styles, { withTheme: true })(gameRoom)
+export default withStyles(styles, { withTheme: true })(ClientGamePage)
 
 
 export const getServerSideProps: GetServerSideProps = async (context) => {

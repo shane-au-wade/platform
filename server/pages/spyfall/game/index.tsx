@@ -1,5 +1,5 @@
 import React, { Component, ReactNode } from 'react'
-import { GetServerSideProps } from 'next'
+//import { GetServerSideProps } from 'next'
 import io from 'socket.io-client';
 import {Table, 
         TableHead,
@@ -8,18 +8,34 @@ import {Table,
         TableCell,
         Card,
         Button,
-        TextField,
         NativeSelect,
         FormControl,
         InputLabel
         } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
 
-interface Props {}
-interface State {}
+interface Props {
+    id: string,
+    classes: {
+        root: string,
+        centerContainer: string,
+        inputContainer: string,
+        title: string,
+        spacer: string,
+        startButton: string
+    }
+}
+interface State { 
+    gameCode: string, 
+    startButton: { background: string },
+    disableStart: boolean,
+    players: Array<{name: string}>,
+    timer: number, 
+    locations: Array<{location: string}>,
+}
 
 
-const styles = theme => ({
+const styles = (theme: object): object => ({
 root: {
     height: '100vh',
     width: '100vw'
@@ -50,7 +66,7 @@ startButton: {
 }
 });
 
-class join extends Component<Props, State> {
+class HostGamePage extends Component<Props, State> {
 
     constructor(props: Props) {
         super(props)
@@ -66,95 +82,104 @@ class join extends Component<Props, State> {
         }
     }
 
-    isValidNewPlayer = async (playerName) => {
-
+    isValidNewPlayer = async (playerName: string): Promise<boolean> => {
         return new Promise((resolve, reject) => {
-            console.log('player in isValid:', playerName)
-                    console.log(this.state.players)
-
-                    if(this.state.players.length == 0) {
+            //console.log('player in isValid:', playerName)
+            //console.log(this.state.players)
+            if(this.state.players.length == 0) {
+                resolve(true)
+            }
+            else {
+                for(let i=0; i < this.state.players.length; ++i ) {
+                    if(this.state.players[i].name == playerName) {
+                        resolve(false)
+                    }
+                    if((i+1)===this.state.players.length) {
                         resolve(true)
                     }
-                    else {
-                        for(let i=0; i < this.state.players.length; ++i ) {
-                        if(this.state.players[i].name == playerName) {
-                             resolve(false)
-                        }
-                        if((i+1)===this.state.players.length) {
-                            resolve(true)
-                        }
-                        }
-                    }
-
-                    
+                }
+            } 
         });
-       
     }
 
-    componentDidMount = async () => {
-
-        let gameCode = localStorage.getItem('gameCode')
-
+    loadSocketIOCode = (gameCode: string): void => {
         const socket = io.connect('/spyfall/socket');
 
         socket.on('news', function (data) {
             console.log(data);
             socket.emit('my other event', { my: 'data' });
-          });
+        });
 
         socket.emit('join', { gameCode: gameCode });
 
         socket.on('newPlayer', async (player) => {
             console.log('new player joining:', player)
 
-            let state = {}
-            state.players = this.state.players
-            let valid = await this.isValidNewPlayer(player.name)
-            console.log(valid)
-            if(valid)
+            let state = {
+                players: this.state.players
+            }
+            let isPlayerValid = await this.isValidNewPlayer(player.name)
+            //console.log(isPlayerValid)
+            if(isPlayerValid)
             {
-                console.log('valid player')
+                //console.log('valid player')
                 state.players.push(player)
                 this.setState(state); 
                 socket.emit('updatePlayers', { players: state.players, room: this.state.gameCode })
             }
             else {
+                // this is a returning player and we should still update that
+                // new player with the existing players array
                 socket.emit('updatePlayers', { players: state.players, room: this.state.gameCode })
             }
            
             if(this.state.players.length >= 3)
             {
+                // allows the game to be played with host + 3 or more players 
                 this.enableStart()
             }
-           
         })
+
+    }
+
+    componentDidMount = async (): Promise<void> => {
+
+        let gameCode = localStorage.getItem('gameCode')
+
+        this.loadSocketIOCode(gameCode)
 
         // update game code
         let res = await fetch('http://localhost:4000/api/spyfall/getLocations')
         let locations = await res.json()
-
-        let state = {}
-        state.gameCode = gameCode
-        state.locations = locations
+        let state = {
+            gameCode: gameCode,
+            locations: locations
+        }
         this.setState(state);
     }
 
-    handleTimeSelect = (event) => {
+    handleTimeSelect = (event):void => {
         console.log(event.target.value)
     }
 
-    enableStart = () => {
-        let state = {}
-        state.startButton = { background: 'rgba(52, 235, 110, 0.9)'}
-        state.disableStart = false
+    enableStart = (): void => {
+        let state = {
+            startButton: { background: 'rgba(52, 235, 110, 0.9)'},
+            disableStart: false
+        }
         this.setState(state);
     }
 
-    disableStart = () => {
-        let state = {}
-        state.startButton = { background: 'rgba(52, 235, 110, 0.5)'}
-        state.disableStart = true
+    disableStart = (): void => {
+        let state = {
+            startButton: { background: 'rgba(52, 235, 110, 0.5)'},
+            disableStart: true
+        }
         this.setState(state);
+    }
+
+    handleGameStart = (): void => {
+        // handle the game start logic
     }
 
     render(): ReactNode {
@@ -165,13 +190,10 @@ class join extends Component<Props, State> {
                <Card className={classes.centerContainer}>
                    <div className={classes.title}>
                         Spyfall
-
                         <h1>{this.state.gameCode}</h1>
                    </div>
             
-
                 <div className={classes.inputContainer}>
-
                     {/* Players table that will be updated with socket.io */}
                     <Table>
                         <TableHead>
@@ -204,7 +226,7 @@ class join extends Component<Props, State> {
                         </NativeSelect>
                     </FormControl>
                     
-                    <Button onClick={this.handleJoin} disabled={this.state.disableStart} className={classes.startButton} style={this.state.startButton}>
+                    <Button onClick={this.handleGameStart} disabled={this.state.disableStart} className={classes.startButton} style={this.state.startButton}>
                         Start Game
                     </Button>
 
@@ -216,4 +238,4 @@ class join extends Component<Props, State> {
     }
 }
 
-export default withStyles(styles, { withTheme: true })(join)
+export default withStyles(styles, { withTheme: true })(HostGamePage)

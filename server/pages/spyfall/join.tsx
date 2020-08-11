@@ -8,10 +8,21 @@ import {Paper,
 
 import { withStyles } from '@material-ui/core/styles';
 
-interface Props {}
-interface State {}
+interface Props {
+    classes: {
+        root: string,
+        centerContainer: string,
+        inputContainer: string,
+        title: string,
+        spacer: string
+    }
+}
+interface State {
+    name: string, // user name input
+    gameCode: string // gameCode input
+}
 
-const styles = theme => ({
+const styles = (theme: object): object => ({
 root: {
     height: '100vh',
     width: '100vw'
@@ -37,7 +48,7 @@ spacer: {
 }
 });
 
-class join extends Component<Props, State> {
+class JoinPage extends Component<Props, State> {
 
     constructor(props: Props) {
         super(props)
@@ -45,10 +56,6 @@ class join extends Component<Props, State> {
             name: '',
             gameCode: '',
         }
-    }
-
-    componentDidMount = () => {
-      
     }
 
     handleChange = (event) => {
@@ -103,4 +110,4 @@ class join extends Component<Props, State> {
     }
 }
 
-export default withStyles(styles, { withTheme: true })(join)
+export default withStyles(styles, { withTheme: true })(JoinPage)

@@ -1,4 +1,3 @@
-
 export const locations = [
     {location: "airplane"},
     {location: "bank"},

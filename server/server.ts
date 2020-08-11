@@ -19,7 +19,7 @@ const logger = require('morgan');
 const io = require('./socketIO')
 
 // global base dir name setup for routes 
-global.__basedir = __dirname;
+//global.__basedir = __dirname;
 
 // express routes imports 
 // const indexRouter = require('./routes/index');
@@ -113,6 +113,10 @@ function onError(error) {
       : 'port ' + addr.port;
     debug('Listening on ' + bind);
   }
+
+
  // end nextApp.prepare()
 })
+
+module.exports = {PoweredByExpress: true}
 
