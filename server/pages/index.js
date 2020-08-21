@@ -3,23 +3,68 @@ import Link from 'next/link'
 import {
   Paper,
   Button,
+  IconButton,
+  Avatar, 
+  Typography
   } from '@material-ui/core';
+import ProfileTile from '../public/components/profileTile'
+import SocialConnections from '../public/components/socialConnections'
+
 
 export default function Home() {
   return (
     <div>
-      <Paper style={{height: '200px', width: '200px', margin: '0 auto', marginTop: 'calc(100vh - 100vh*0.5 - 100px)', textAlign: 'center'}}elevation={3}>
-        <Link href='/spyfall'>
-          <Button style={{background: '#fff', color: '#000', height: '36px', marginTop: 'calc(100% * 0.5 - 18px '}}>
-            Player Spyfall
-          </Button>
-        </Link>
-        <br/>
-        <br/>
-        <a href='https://www.spyfall.app/gamerules' style={{color: '#F9DAFE'}}>
-          What is Spyfall?
-        </a>
-      </Paper>
+
+      {/* landing image */}
+      <ProfileTile
+      ></ProfileTile>
+      
+        {/* experience */}
+        <Paper style={{padding:20}}>
+          <div>
+            <div>
+            Lacroix Boards co
+            </div> 
+             Full Stack Software Engineer
+          </div>
+          <br/>
+          <div>
+            <div>
+              OSHU LLC
+            </div>
+            Web Task Automation
+          </div>
+          <br/>
+          <div>
+            <div>
+              KeepTruckin
+            </div>
+            Data Engineering Intern
+          </div>
+        </Paper>
+
+        {/* projects */}
+        <Paper style={{padding:20}}>
+          <div>
+            Gator Groceries
+          </div>
+          <br/>
+          <div>
+            Portable Electric Vehicles
+          </div>
+
+        </Paper>
+
+        {/* Philosphy */}
+
+        {/* Contact me */}
+        <SocialConnections
+          github='https://github.com/shane-au-wade'
+          linkedin='https://www.linkedin.com/in/shane-au-wade/'
+          instagram='https://www.instagram.com/shane_creates/'
+        ></SocialConnections>
+
+        
     </div>
   )
 }

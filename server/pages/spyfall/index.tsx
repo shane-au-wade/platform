@@ -26,12 +26,12 @@ centerContainer: {
     minWidth: 275,
     maxWidth: 500,
     margin: '0 auto',
-    height: '100%'
-    
+    height: '100%',
+    textAlign: 'center'
 }, 
 buttonContainer: {
     display: 'flex',
-    flexDirection: 'column'
+    flexDirection: 'column', 
 }, 
 buttonStyle: {
     width: '200px', 
@@ -87,6 +87,9 @@ class SpyfallHomePage extends Component<Props, State> {
                             </Button>
                         </Link>
                     </div>
+                    <a href='https://www.spyfall.app/gamerules' style={{color: '#F9DAFE'}}>
+                    What is Spyfall?
+                    </a>
                </Card> 
             </div>
         )

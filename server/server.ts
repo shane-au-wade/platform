@@ -26,7 +26,6 @@ const io = require('./socketIO')
 // const ridesRouter = require('./routes/rides')
 // const authRouter = require('./routes/auth')
 
-
 nextApp.prepare().then(() => {
   const app = express()
   app.io = io
@@ -73,16 +72,13 @@ nextApp.prepare().then(() => {
 //     console.log(`> Ready on http://localhost:${port}`)
 //   })
 
-
-    /**
+  /**
  * Event listener for HTTP server "error" event.
  */
-
 function onError(error) {
     if (error.syscall !== 'listen') {
       throw error;
     }
-  
     var bind = typeof port === 'string'
       ? 'Pipe ' + port
       : 'Port ' + port;
@@ -101,11 +97,9 @@ function onError(error) {
         throw error;
     }
   }
-  
   /**
    * Event listener for HTTP server "listening" event.
    */
-  
   function onListening() {
     var addr = server.address();
     var bind = typeof addr === 'string'
@@ -113,8 +107,6 @@ function onError(error) {
       : 'port ' + addr.port;
     debug('Listening on ' + bind);
   }
-
-
  // end nextApp.prepare()
 })
 
